@@ -1,28 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jinhong <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/05/15 13:17:02 by jinhong           #+#    #+#             */
-/*   Updated: 2019/05/29 16:15:20 by jinhong          ###   ########.fr       */
+/*   Created: 2019/05/17 13:54:59 by jinhong           #+#    #+#             */
+/*   Updated: 2019/05/27 20:50:40 by jinhong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-# define BUFF_SIZE 9999
-# include <unistd.h>
+#include "libft/libft.h"
+#include "get_next_line.h"
+#include <fcntl.h>
 
-int					get_next_line(const int fd, char **line);
-
-typedef struct		s_file
+int		main(int argc, char **argv)
 {
-	char		buff[BUFF_SIZE + 1];
-	int			let;
-	char		*temp;
-	int			index;
-}					t_file;
+	int		fd;
+	char	*line;
 
-#endif
+	if (argc == 1)
+		fd = 0;
+	else if (argc == 2)
+		fd = open(argv[1], O_RDONLY);
+	else
+		return (2);
+	while (get_next_line(fd, &line) == 1)
+	{
+		ft_putendl(line);
+		free(line);
+	}
+	if (argc == 2)
+		close(fd);
+}

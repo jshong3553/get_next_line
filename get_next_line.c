@@ -6,69 +6,63 @@
 /*   By: jinhong <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/15 13:16:55 by jinhong           #+#    #+#             */
-/*   Updated: 2019/05/20 19:06:41 by jinhong          ###   ########.fr       */
+/*   Updated: 2019/05/29 16:15:11 by jinhong          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft/libft.h"
 #include "get_next_line.h"
 
-int		copy(int fd, char **line, char **s, int i)
+int		copy(int fd, char **line, char **s, int index)
 {
-	char	*temp;
+	char		*temp;
 
-	if (s[fd][i] == '\0')
+	if (s[fd][index] == '\0')
 	{
 		*line = ft_strdup(s[fd]);
-		ft_strdel(&s[fd]);
+		free(s[fd]);
+		s[fd] = NULL;
 	}
-	else if (s[fd][i] == '\n')
+	else if (s[fd][index] == '\n')
 	{
-		*line = ft_strsub(s[fd], 0, i);
-		temp = ft_strdup(&s[fd][i + 1]);
+		*line = ft_strsub(s[fd], 0, index);
+		temp = ft_strdup(&s[fd][index + 1]);
 		free(s[fd]);
 		s[fd] = temp;
 		if (s[fd][0] == '\0')
-			ft_strdel(&s[fd]);
+		{
+			free(s[fd]);
+			s[fd] = NULL;
+		}
 	}
-	return (1);
-}
-
-int		check_line(int fd, char **line, char **s)
-{
-	int		i;
-
-	i = 0;
-	while (s[fd][i] != '\n' && s[fd][i] != '\0')
-		i++;
-	copy(fd, line, s, i);
 	return (1);
 }
 
 int		get_next_line(const int fd, char **line)
 {
-	static char		*s[255];
-	char			buff[BUFF_SIZE + 1];
-	char			*temp;
-	int				r;
+	static char	*s[255];
+	t_file		var_list;
 
 	if (fd < 0 || line == NULL)
 		return (-1);
-	while ((r = read(fd, buff, BUFF_SIZE)) > 0)
+	if (s[fd] == NULL)
+		s[fd] = ft_strnew(0);
+	while ((var_list.let = read(fd, var_list.buff, BUFF_SIZE)) > 0)
 	{
-		buff[r] = '\0';
-		if (s[fd] == NULL)
-			s[fd] = ft_strnew(1);
-		temp = ft_strjoin(s[fd], buff);
+		var_list.buff[var_list.let] = '\0';
+		var_list.temp = ft_strjoin(s[fd], var_list.buff);
 		free(s[fd]);
-		s[fd] = temp;
-		if (ft_strchr(buff, '\n'))
+		s[fd] = var_list.temp;
+		if (ft_strchr(var_list.buff, '\n'))
 			break ;
 	}
-	if (r == 0 && (s[fd] == NULL || s[fd][0] == '\0'))
+	if (var_list.let == 0 && (s[fd] == NULL || s[fd][0] == '\0'))
 		return (0);
-	if (r < 0)
+	else if (var_list.let < 0)
 		return (-1);
-	check_line(fd, line, s);
+	var_list.index = 0;
+	while (s[fd][var_list.index] != '\n' && s[fd][var_list.index] != '\0')
+		var_list.index++;
+	copy(fd, line, s, var_list.index);
 	return (1);
 }
